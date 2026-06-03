@@ -16,16 +16,29 @@ import com.example.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
   private val viewModel: QuestionViewModel by viewModels()
+  private lateinit var voiceSynthesizer: VoiceSynthesizer
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
+    
+    voiceSynthesizer = VoiceSynthesizer(this)
+
     setContent {
       MyApplicationTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-          QuestionScreen(viewModel = viewModel, modifier = Modifier.padding(innerPadding))
+          QuestionScreen(
+            viewModel = viewModel,
+            voiceSynthesizer = voiceSynthesizer,
+            modifier = Modifier.padding(innerPadding)
+          )
         }
       }
     }
+  }
+
+  override fun onDestroy() {
+      super.onDestroy()
+      voiceSynthesizer.shutdown()
   }
 }

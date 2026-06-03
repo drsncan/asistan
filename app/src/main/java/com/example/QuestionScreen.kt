@@ -44,12 +44,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
 @Composable
 fun QuestionScreen(
     viewModel: QuestionViewModel,
+    voiceSynthesizer: VoiceSynthesizer,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isSummarizing by viewModel.isSummarizing.collectAsStateWithLifecycle()
+
+    var topicText by remember { mutableStateOf("") }
+    var summaryResult by remember { mutableStateOf("") }
 
     Scaffold(modifier = modifier) { innerPadding ->
         Column(
@@ -60,8 +72,8 @@ fun QuestionScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Soru Metni ve Şıklar
             uiState.question?.let { question ->
-                // Soru Metni
                 Text(
                     text = question.text,
                     style = MaterialTheme.typography.titleLarge,
@@ -69,12 +81,10 @@ fun QuestionScreen(
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
                         .semantics { 
-                            // Soru olduğunu özellikle belirtiyoruz
                             contentDescription = "Soru: ${question.text}"
                         }
                 )
 
-                // Şıklar
                 question.options.forEach { option ->
                     val isSelected = uiState.selectedOptionId == option.id
                     val isCorrect = question.correctOptionId == option.id
@@ -91,9 +101,8 @@ fun QuestionScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Ekran Okuyucu otonom bildirimi için Live Region (Görsel olarak da geri bildirim verir)
             if (uiState.feedbackMessage.isNotEmpty()) {
                 Box(
                     modifier = Modifier
@@ -108,11 +117,77 @@ fun QuestionScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         color = if (uiState.selectedOptionId == uiState.question?.correctOptionId) {
-                            Color(0xFF2E7D32) // Koyu yeşil
+                            Color(0xFF2E7D32)
                         } else {
                             MaterialTheme.colorScheme.error
                         }
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // AI Asistan Bölümü
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Akıllı Asistan",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+
+                    OutlinedTextField(
+                        value = topicText,
+                        onValueChange = { topicText = it },
+                        label = { Text("Konu Başlığı (Örn: Türkiye'nin coğrafi konumu)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Button(
+                        onClick = {
+                            if (topicText.isNotBlank()) {
+                                viewModel.createSummary(topicText) { result ->
+                                    summaryResult = result
+                                    voiceSynthesizer.speak(result)
+                                }
+                            }
+                        },
+                        enabled = !isSummarizing,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (isSummarizing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text("Bana Konuyu Özetle")
+                        }
+                    }
+
+                    if (summaryResult.isNotEmpty()) {
+                        Text(
+                            text = summaryResult,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    MaterialTheme.colorScheme.surface,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .padding(12.dp)
+                        )
+                    }
                 }
             }
         }

@@ -13,6 +13,11 @@ class QuestionViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(QuestionState())
     val uiState: StateFlow<QuestionState> = _uiState.asStateFlow()
 
+    private val summaryService = GeminiSummaryService()
+
+    private val _isSummarizing = MutableStateFlow(false)
+    val isSummarizing: StateFlow<Boolean> = _isSummarizing.asStateFlow()
+
     init {
         loadMockQuestion()
     }
@@ -62,5 +67,14 @@ class QuestionViewModel : ViewModel() {
     fun nextQuestion() {
         // İleriki aşamada sıradaki soruyu getirecek
         // Şimdilik sadece state'i temizleyip aynı soruyu baştan verelim veya farklı bir soru yükleyelim
+    }
+
+    fun createSummary(topic: String, onResult: (String) -> Unit) {
+        viewModelScope.launch {
+            _isSummarizing.value = true
+            val result = summaryService.summarizeTopic(topic)
+            _isSummarizing.value = false
+            onResult(result.getOrNull() ?: result.exceptionOrNull()?.message ?: "Bilinmeyen Hata")
+        }
     }
 }
