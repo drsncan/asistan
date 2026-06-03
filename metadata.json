@@ -1,0 +1,6 @@
+{
+  "name": "KPSS Asistanı",
+  "description": "Görme engelli bireyler için çok modlu, erişilebilir KPSS sınav çalışma asistanı.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
