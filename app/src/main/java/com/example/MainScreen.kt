@@ -104,20 +104,8 @@ fun MainScreen(
                 FlashcardScreen(viewModel = viewModel)
             }
             composable(ScreenDestination.Assistant.route) {
-                AssistantScreen()
+                AssistantScreen(voiceSynthesizer = voiceSynthesizer)
             }
         }
-    }
-}
-
-@Composable
-fun AssistantScreen(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        Text(
-            text = "Asistan",
-            modifier = Modifier
-                .padding(16.dp)
-                .semantics { heading() }
-        )
     }
 }
