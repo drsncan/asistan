@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       MyApplicationTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-          QuestionScreen(
+          MainScreen(
             viewModel = viewModel,
             voiceSynthesizer = voiceSynthesizer,
             modifier = Modifier.padding(innerPadding)

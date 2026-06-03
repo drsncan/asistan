@@ -18,3 +18,14 @@ data class QuestionState(
     val isAnswered: Boolean = false,
     val feedbackMessage: String = ""
 )
+
+data class FlashcardModel(
+    val id: Int,
+    val frontText: String,
+    val backText: String
+)
+
+data class FlashcardState(
+    val currentCard: FlashcardModel? = null,
+    val isFlipped: Boolean = false
+)

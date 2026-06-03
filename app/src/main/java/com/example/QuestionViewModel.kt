@@ -18,8 +18,32 @@ class QuestionViewModel : ViewModel() {
     private val _isSummarizing = MutableStateFlow(false)
     val isSummarizing: StateFlow<Boolean> = _isSummarizing.asStateFlow()
 
+    private val mockFlashcards = listOf(
+        FlashcardModel(1, "Türkiye'nin en yüksek dağı hangisidir?", "Ağrı Dağı"),
+        FlashcardModel(2, "İstiklal Marşı'nın şairi kimdir?", "Mehmet Akif Ersoy"),
+        FlashcardModel(3, "Türkiye Büyük Millet Meclisi hangi tarihte açılmıştır?", "23 Nisan 1920")
+    )
+    private var currentFlashcardIndex = 0
+
+    private val _flashcardState = MutableStateFlow(FlashcardState(currentCard = mockFlashcards[currentFlashcardIndex]))
+    val flashcardState: StateFlow<FlashcardState> = _flashcardState.asStateFlow()
+
     init {
         loadMockQuestion()
+    }
+
+    fun flipFlashcard() {
+        _flashcardState.update { it.copy(isFlipped = !it.isFlipped) }
+    }
+
+    fun markAsCorrect() {
+        currentFlashcardIndex = (currentFlashcardIndex + 1) % mockFlashcards.size
+        _flashcardState.update { it.copy(currentCard = mockFlashcards[currentFlashcardIndex], isFlipped = false) }
+    }
+
+    fun markAsIncorrect() {
+        currentFlashcardIndex = (currentFlashcardIndex + 1) % mockFlashcards.size
+        _flashcardState.update { it.copy(currentCard = mockFlashcards[currentFlashcardIndex], isFlipped = false) }
     }
 
     private fun loadMockQuestion() {
